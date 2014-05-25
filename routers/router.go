@@ -7,10 +7,13 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
-	beego.Router("/add", &controllers.MainController{}, "post:Add")
-	beego.Router("/remove/:id", &controllers.MainController{}, "delete:Remove")
-	beego.Router("/get", &controllers.MainController{}, "get:Get")
 
-	beego.Router("/ok/:id", &controllers.MainController{}, "head:OK")
+	beego.Router("/user", &controllers.MainController{}, "post:AddUser")
+
+	beego.Router("/process", &controllers.MainController{}, "post:AddProcess")
+	beego.Router("/process/:id", &controllers.MainController{}, "delete:RemoveProcess")
+	beego.Router("/process", &controllers.MainController{}, "get:GetProcess")
+
+	beego.Router("/ok/:id/:user", &controllers.MainController{}, "post:OK")
 	beego.Router("/state/:id", &controllers.MainController{}, "get:GetState")
 }
