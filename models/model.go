@@ -8,12 +8,12 @@ type User struct {
 type Process struct {
 	Id       int    `json:"id"`
 	Content  string `json:"content"`
-	Duration string `json:"duration"`
+	Duration int    `json:"duration"`
 }
 
 type Record struct {
 	Id        int    `json:"id"`
-	UserName  string `json:"username"`
-	ProcessId int    `json:"processid"`
-	State     string `json:"state"`
+	UserName  string `json:"username" xorm:"username"`
+	ProcessId int    `json:"processid" xorm:"processid"`
+	State     string `json:"state" xorm:"state"`
 }
