@@ -21,10 +21,11 @@ func init() {
 	var err error
 	engine, err = xorm.NewEngine("mysql", "root:qwerty@/opensips?charset=utf8")
 	// defer engine.Close()
+	engine.ShowSQL = true
 
 	f, err := os.Create("sql.log")
 	if err != nil {
-		println(err.Error())
+		panic(err.Error())
 		return
 	}
 	engine.Logger = f
@@ -41,9 +42,22 @@ func (this *MainController) AddUser() {
 	user := models.User{}
 	json.Unmarshal(this.Ctx.Input.RequestBody, &user)
 
-	this.Data["Website"] = "beego.me"
-	this.Data["Email"] = user.UserName
-	this.TplNames = "index.tpl"
+	_, err := engine.Table("user").Insert(&user)
+
+	if err == nil {
+		this.Data["json"] = ""
+		this.ServeJson()
+	} else {
+		this.Abort("500")
+	}
+}
+
+func (this *MainController) GetUsers() {
+	users := []models.User{}
+	username := this.Ctx.Input.Param(":user")
+	engine.Table("user").Where("username!=?", username).Find(&users)
+	this.Data["json"] = users
+	this.ServeJson()
 }
 
 func (this *MainController) AddProcess() {
@@ -52,21 +66,27 @@ func (this *MainController) AddProcess() {
 
 	_, err := engine.Table("process").Insert(&process)
 
-	this.Data["Website"] = process.Duration
-	this.Data["Email"] = err
-	this.TplNames = "index.tpl"
+	if err == nil {
+		this.Data["json"] = ""
+		this.ServeJson()
+	} else {
+		this.Abort("500")
+	}
 }
 
 func (this *MainController) RemoveProcess() {
 	ProcessId, _ := strconv.Atoi(this.Ctx.Input.Param(":id"))
 	// process := models.Process{}
 	// process.Id = ProcessId
-	sql := "delete from process where id=?"
+	sql := "delete  from process where id=?"
 	_, err := engine.Exec(sql, ProcessId)
 
-	this.Data["Website"] = err
-	this.Data["Email"] = ProcessId
-	this.TplNames = "index.tpl"
+	if err == nil {
+		this.Data["json"] = ""
+		this.ServeJson()
+	} else {
+		this.Abort("500")
+	}
 }
 
 func (this *MainController) GetProcess() {
@@ -84,10 +104,13 @@ func (this *MainController) OK() {
 	record.UserName = UserName
 	record.ProcessId = ProcessId
 	record.State = "ok"
-	id, err := engine.Table("record").Insert(&record)
-	this.Data["Website"] = id
-	this.Data["Email"] = err
-	this.TplNames = "index.tpl"
+	_, err := engine.Table("record").Insert(&record)
+	if err == nil {
+		this.Data["json"] = ""
+		this.ServeJson()
+	} else {
+		this.Abort("500")
+	}
 }
 
 func (this *MainController) GetState() {

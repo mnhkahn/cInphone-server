@@ -1,8 +1,8 @@
 package models
 
 type User struct {
-	UserName string `json:"username"`
-	Role     string `json:"role"`
+	UserName string `json:"username" xorm:"username"`
+	Role     string `json:"role" xorm:"role"`
 }
 
 type Process struct {

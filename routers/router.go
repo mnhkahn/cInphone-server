@@ -9,11 +9,12 @@ func init() {
 	beego.Router("/", &controllers.MainController{})
 
 	beego.Router("/user", &controllers.MainController{}, "post:AddUser")
+	beego.Router("/users/:user", &controllers.MainController{}, "get:GetUsers")
 
 	beego.Router("/process", &controllers.MainController{}, "post:AddProcess")
 	beego.Router("/process/:id", &controllers.MainController{}, "delete:RemoveProcess")
 	beego.Router("/process", &controllers.MainController{}, "get:GetProcess")
 
-	beego.Router("/ok/:id/:user", &controllers.MainController{}, "post:OK")
-	beego.Router("/state/:id", &controllers.MainController{}, "get:GetState")
+	beego.Router("/record/:id/:user", &controllers.MainController{}, "post:OK")
+	beego.Router("/record/:id", &controllers.MainController{}, "get:GetState")
 }
