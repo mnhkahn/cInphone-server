@@ -1,5 +1,10 @@
 package models
 
+type Notification struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
 type User struct {
 	UserName string `json:"username" xorm:"username"`
 	Role     string `json:"role" xorm:"role"`

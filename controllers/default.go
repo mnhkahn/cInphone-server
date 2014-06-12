@@ -4,11 +4,15 @@ import (
 	"cInphone-server/models"
 	"encoding/json"
 	// "fmt"
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/astaxie/beego"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lunny/xorm"
+	"net/url"
 	"os"
 	"strconv"
+	"time"
 )
 
 type MainController struct {
@@ -19,7 +23,7 @@ var engine *xorm.Engine
 
 func init() {
 	var err error
-	engine, err = xorm.NewEngine("mysql", "root:qwerty@/opensips?charset=utf8")
+	engine, err = xorm.NewEngine("mysql", "root:selinai5@/opensips?charset=utf8")
 	// defer engine.Close()
 	engine.ShowSQL = true
 
@@ -29,12 +33,58 @@ func init() {
 		return
 	}
 	engine.Logger = f
-
 }
 
 func (this *MainController) Get() {
 	this.Data["Website"] = "beego.me"
 	this.Data["Email"] = "astaxie@gmail.com"
+	this.TplNames = "index.tpl"
+}
+
+var apikey = "vkl8Pc6QCUjHSemG0wUwVAzQ"
+var seckey = "GbrgjnajK6LKl5oa5EIGCuGBRYe8twRP"
+var method = "POST"
+var url_base = "http://channel.api.duapp.com/rest/2.0/channel/channel"
+var query = map[string]string{}
+
+func (this *MainController) Push() {
+	title := this.GetString("title")
+	description := this.GetString("description")
+
+	// var url_base = "http://channel.api.duapp.com/rest/2.0/channel/channelapikey=vkl8Pc6QCUjHSemG0wUwVAzQmessage_type=1messages={\"title\":\"" + title + "\",\"description\":\"" + description + "\"}method=push_msgmsg_keys=msgkey"
+
+	query["apikey"] = apikey
+	query["message_type"] = "1"
+	query["messages"] = "{\"title\":\"" + title + "\",\"description\":\"" + description + "\"}"
+	query["method"] = "push_msg"
+	query["msg_keys"] = "msgkey"
+	query["push_type"] = "3"
+	query["timestamp"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+	// sign0 := method + url_base + "apikey=" + apikey + "message_type=0messages={\"title\":\"" + title + "\",\"description\":\"" + description + "\"}method=push_msgmsg_keys=msgkeypush_type=3timestamp=1402495456" + seckey
+	// sign1 := "POSThttp://channel.api.duapp.com/rest/2.0/channel/channelapikey=vkl8Pc6QCUjHSemG0wUwVAzQmessage_type=1messages={\"title\":\"" + title + "\",\"description\":\"" + description + "\"}method=push_msgmsg_keys=msgkeypush_type=3timestamp=1402495022GbrgjnajK6LKl5oa5EIGCuGBRYe8twRP"
+	sign := method + url_base
+	for k, v := range query {
+		sign += k + "=" + v
+	}
+
+	sign += seckey
+
+	sign = url.QueryEscape(sign)
+
+	m := md5.New()
+	m.Write([]byte(sign))
+	sign = hex.EncodeToString(m.Sum(nil))
+
+	// url_sign := url_base + "?"
+	// for k, v := range query {
+	// 	url_sign += k + "=" + v + "&"
+	// }
+
+	url_sign := "channel.api.duapp.com/rest/2.0/channel/channel?method=push_msg&apikey=vkl8Pc6QCUjHSemG0wUwVAzQ&message_type=1&messages={\"title\":\"" + title + "\",\"description\":\"" + description + "\"}&msg_keys=msgkey&push_type=3&timestamp=" + query["timestamp"]
+	url_sign += "&sign=" + sign
+	this.Data["Website"] = url_sign
+	this.Data["Email"] = query["timestamp"]
 	this.TplNames = "index.tpl"
 }
 
